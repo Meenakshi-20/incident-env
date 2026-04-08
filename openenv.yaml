@@ -1,0 +1,81 @@
+name: incident-report-autofiller
+version: "1.0.0"
+description: >
+  An OpenEnv environment where AI agents practice filling structured
+  incident reports from raw incident descriptions. Simulates real SRE
+  workflows: given a raw log dump or alert description, the agent must
+  identify root cause, severity, affected systems, and next steps.
+
+tags:
+  - openenv
+  - incident-management
+  - sre
+  - operations
+  - nlp
+
+tasks:
+  - id: easy
+    description: "Simple server crash with clear logs. Agent must identify disk-full root cause."
+    difficulty: easy
+    max_steps: 3
+    reward_range: [0.0, 1.0]
+
+  - id: medium
+    description: "Multi-system outage caused by traffic spike overwhelming Redis cache."
+    difficulty: medium
+    max_steps: 3
+    reward_range: [0.0, 1.0]
+
+  - id: hard
+    description: "Ambiguous intermittent login failures caused by partial JWT secret rotation."
+    difficulty: hard
+    max_steps: 3
+    reward_range: [0.0, 1.0]
+
+action_space:
+  type: structured
+  fields:
+    - name: root_cause
+      type: string
+      description: What caused the incident
+    - name: severity
+      type: string
+      enum: [low, medium, high, critical]
+    - name: affected_systems
+      type: string
+      description: Comma-separated list of affected systems
+    - name: next_steps
+      type: string
+      description: Concrete resolution actions
+    - name: estimated_resolution_time
+      type: string
+      description: "e.g. 30 minutes, 2 hours"
+
+observation_space:
+  type: structured
+  fields:
+    - name: incident_description
+      type: string
+      description: Raw incident log or alert description
+    - name: task_id
+      type: string
+    - name: task_difficulty
+      type: string
+    - name: step_number
+      type: integer
+    - name: feedback
+      type: string
+      description: Per-field grading feedback from previous step
+
+reward:
+  type: continuous
+  range: [0.0, 1.0]
+  description: >
+    Partial credit per field. root_cause=0.25, severity=0.25,
+    affected_systems=0.25, next_steps=0.15, estimated_resolution_time=0.10.
+    Reward per step = improvement over best score so far.
+
+endpoints:
+  reset: POST /reset
+  step:  POST /step
+  state: GET  /state

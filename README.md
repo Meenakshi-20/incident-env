@@ -1,3 +1,14 @@
+@"
+---
+title: Incident Env
+emoji: 🚨
+colorFrom: red
+colorTo: orange
+sdk: docker
+pinned: false
+---
+"@ + (Get-Content README.md -Raw) | Set-Content README.md
+
 # Incident Report Auto-Filler — OpenEnv Environment
 
 An OpenEnv environment where AI agents practice filling structured incident
